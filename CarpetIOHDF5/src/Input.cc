@@ -138,6 +138,13 @@ void CarpetIOHDF5_RecoverGridStructure(CCTK_ARGUMENTS) {
   assert(type == PARAMETER_BOOLEAN);
   CCTK_INT const regrid_in_level_mode = *static_cast<CCTK_INT const *>(ptr);
 
+  if (do_not_regrid_on_recover_test){
+    vector<vector<vector<region_t> > > regsss = fileset.grid_structure;
+    // Make multigrid aware
+    Carpet::MakeMultigridBoxesMaps(cctkGH, regsss, regssss);
+  }
+  else {
+
   if (not regrid_in_level_mode) {
     // Distribute each map independently
 
@@ -193,6 +200,8 @@ void CarpetIOHDF5_RecoverGridStructure(CCTK_ARGUMENTS) {
     Carpet::MakeMultigridBoxesMaps(cctkGH, regsss, regssss);
 
   } // if regrid_in_level_mode
+
+  } // if do_not_regrid_on_recover_test
 
   for (int m = 0; m < maps; ++m) {
     // Regrid
@@ -680,6 +689,10 @@ int Recover(cGH *cctkGH, const char *basefilename, int called_from) {
       }
     }
 
+    // force the checkpoint recover steps to read only one file instead of looping over all files, i.e. skip checking if all variables have been read completely already
+    if (use_one_ckpt_file_per_proc){
+      break;
+    }
     // check if all variables have been read completely already
     bool all_done = true;
     for (unsigned int vindex = 0; vindex < read_completely.size(); vindex++) {

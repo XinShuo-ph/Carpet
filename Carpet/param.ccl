@@ -472,32 +472,6 @@ CCTK_INT processor_topology_3d_z "Number of processors in z-direction" STEERABLE
   1:* :: "must be positive"
 } 1
 
-# Note that we have assumed that the 'ghost_size' is the same with 'boundary_size' when defining the following two types of pars:
-#   split_interior_points_x, split_interior_points_y, split_interior_points_z,
-#   symmetrically_distribute_points_x, symmetrically_distribute_points_y, symmetrically_distribute_points_z
-# TODO: make these two pars works with refinement.
-BOOLEAN split_interior_points_x "Uniformly divide interior points across processors in x-direction" STEERABLE=recover
-{
-} "no"
-
-BOOLEAN split_interior_points_y "Uniformly divide interior points across processors in y-direction" STEERABLE=recover
-{
-} "no"
-
-BOOLEAN split_interior_points_z "Uniformly divide interior points across processors in z-direction" STEERABLE=recover
-{
-} "no"
-
-BOOLEAN symmetrically_distribute_points_x "Symmetrically distribute points in x-direction over domain center" STEERABLE=recover
-{
-} "no"
-BOOLEAN symmetrically_distribute_points_y "Symmetrically distribute points in y-direction over domain center" STEERABLE=recover
-{
-} "no"
-BOOLEAN symmetrically_distribute_points_z "Symmetrically distribute points in z-direction over domain center" STEERABLE=recover
-{
-} "no"
-
 CCTK_INT split_direction "Direction in which the domain should be split (for processor_topology=along-dir)" STEERABLE=recover
 {
   0:* :: "0 for x, 1 for y, 2 for z, etc."
@@ -606,6 +580,10 @@ BOOLEAN regrid_during_initialisation "Regrid while initialising" STEERABLE=recov
 } "no"
 
 BOOLEAN regrid_during_recovery "Regrid while recovering" STEERABLE=recover
+{
+} "no"
+
+BOOLEAN force_recompose_during_recover "force doing recompose after recovery" STEERABLE=always
 {
 } "no"
 

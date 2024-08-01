@@ -593,6 +593,7 @@ void enter_local_mode(cGH *const cctkGH, int const c, int const lc,
         (ext.lower() - baseext.lower()) / ext.stride();
     ivect_ref(cctkGH->cctk_ubnd) =
         (ext.upper() - baseext.lower()) / ext.stride();
+        (ext.upper() - baseext.lower()) / ext.stride();
     ivect_ref(cctkGH->cctk_lsh) = ext.sizes();
 #ifdef CCTK_HAVE_CGH_TILE
     ivect_ref(cctkGH->cctk_tile_min) = ivect(0);
@@ -625,7 +626,7 @@ void enter_local_mode(cGH *const cctkGH, int const c, int const lc,
       assert(cctkGH->cctk_lsh[d] <= cctkGH->cctk_ash[d]);
 #ifdef CCTK_HAVE_CGH_TILE
       assert(cctkGH->cctk_tile_min[d] == 0);
-      assert(cctkGH->cctk_tile_max[d] == cctkGH->cctk_lsh[d]);
+      assert(cctkGH->cctk_tile_max[d] = cctkGH->cctk_lsh[d]);
 #endif
       assert(cctkGH->cctk_from[d] >= 0);
       assert(cctkGH->cctk_from[d] <= cctkGH->cctk_to[d]);
@@ -1139,8 +1140,8 @@ meta_escape::~meta_escape() {
 // Call functions in specific modes
 //
 
-int CarpetCallLocalFunction(cGH *const cctkGH,
-                            void (*const function)(cGH *const cctkGH)) {
+int CallLocalFunction(cGH *const cctkGH,
+                      void (*const function)(cGH *const cctkGH)) {
   if (is_meta_mode()) {
     BEGIN_MGLEVEL_LOOP(cctkGH) {
       BEGIN_REFLEVEL_LOOP(cctkGH) {
@@ -1177,8 +1178,8 @@ int CarpetCallLocalFunction(cGH *const cctkGH,
   return 0;
 }
 
-int CarpetCallSinglemapFunction(cGH *const cctkGH,
-                                void (*const function)(cGH *const cctkGH)) {
+int CallSinglemapFunction(cGH *const cctkGH,
+                          void (*const function)(cGH *const cctkGH)) {
   if (is_meta_mode()) {
     BEGIN_MGLEVEL_LOOP(cctkGH) {
       BEGIN_REFLEVEL_LOOP(cctkGH) {
@@ -1204,8 +1205,8 @@ int CarpetCallSinglemapFunction(cGH *const cctkGH,
   return 0;
 }
 
-int CarpetCallLevelFunction(cGH *const cctkGH,
-                            void (*const function)(cGH *const cctkGH)) {
+int CallLevelFunction(cGH *const cctkGH,
+                      void (*const function)(cGH *const cctkGH)) {
   if (is_meta_mode()) {
     BEGIN_MGLEVEL_LOOP(cctkGH) {
       BEGIN_REFLEVEL_LOOP(cctkGH) { function(cctkGH); }
@@ -1222,8 +1223,8 @@ int CarpetCallLevelFunction(cGH *const cctkGH,
   return 0;
 }
 
-int CarpetCallGlobalFunction(cGH *const cctkGH,
-                             void (*const function)(cGH *const cctkGH)) {
+int CallGlobalFunction(cGH *const cctkGH,
+                       void (*const function)(cGH *const cctkGH)) {
   if (is_meta_mode()) {
     BEGIN_MGLEVEL_LOOP(cctkGH) { function(cctkGH); }
     END_MGLEVEL_LOOP;
@@ -1234,8 +1235,8 @@ int CarpetCallGlobalFunction(cGH *const cctkGH,
   return 0;
 }
 
-int CarpetCallMetaFunction(cGH *const cctkGH,
-                           void (*const function)(cGH *const cctkGH)) {
+int CallMetaFunction(cGH *const cctkGH,
+                     void (*const function)(cGH *const cctkGH)) {
   BEGIN_META_MODE(cctkGH) { function(cctkGH); }
   END_META_MODE;
   return 0;
@@ -1314,15 +1315,15 @@ void ibbox2iminimax(ibbox const &ext, // component extent
 // Call a scheduling group
 //
 
-int CarpetCallScheduleGroup(cGH *const cctkGH, const char *const group) {
+int CallScheduleGroup(cGH *const cctkGH, const char *const group) {
   CCTK_ScheduleTraverse(group, cctkGH, CallFunction);
   return 0;
 }
 
-extern "C" void CCTK_FCALL CCTK_FNAME(CarpetCallScheduleGroup)(
+extern "C" void CCTK_FCALL CCTK_FNAME(CallScheduleGroup)(
     int *const ierr, cGH *const *const cctkGH, ONE_FORTSTRING_ARG) {
   ONE_FORTSTRING_CREATE(group);
-  *ierr = CarpetCallScheduleGroup(*cctkGH, group);
+  *ierr = CallScheduleGroup(*cctkGH, group);
   free(group);
 }
 

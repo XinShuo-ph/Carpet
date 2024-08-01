@@ -445,6 +445,13 @@ INT checkpoint_every_divisor "Checkpoint if (iteration % out_every) == 0" STEERA
    1:* :: "Every so many iterations"
   -1:0 :: "Disable periodic checkpointing"
 } -1
+BOOLEAN use_one_ckpt_file_per_proc "force the checkpoint recover steps to read only one file instead of looping over all files, i.e. skip checking if all variables have been read completely already" STEERABLE = ALWAYS
+{
+} "no"
+
+BOOLEAN do_not_regrid_on_recover_test "Do not regrid on recover" STEERABLE = ALWAYS
+{
+} "no"
 
 BOOLEAN use_reflevels_from_checkpoint "Use 'CarpetRegrid::refinement_levels' from the checkpoint file rather than from the parameter file ?" STEERABLE = RECOVER
 {

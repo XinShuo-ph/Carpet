@@ -1131,31 +1131,10 @@ static void SplitRegions_AsSpecified(cGH const *const cctkGH,
   const ivect cstr = rstr0;
   const ivect glonp = (rub0 - rlb0) / cstr;
   //     const ivect locnp = (glonp + nprocs_dir - 1) / nprocs_dir;
-  const i2vect &ghost_width = vdd.AT(reg0.map)->ghost_widths.AT(0);
-  const ivect intnp = glonp - ghost_width[0] - ghost_width[1];
-
-  /* distribute the grids uniformly according to num of global grid points */
-  const ivect default_locnp = glonp / nprocs_dir;
-  const ivect default_rem = glonp % nprocs_dir;
-
-  /* distribute the grids uniformly according to num of interior grid points,
-   * there are boundary points at the outer boundary which need to be deducted,
-   * here we assumed that the size of outer boundary is the same with the size
-   * of ghost points */
-  const ivect split_interior_locnp = intnp / nprocs_dir;
-  const ivect split_interior_rem = intnp % nprocs_dir;
-
-  const bvect split_interior(split_interior_points_x, split_interior_points_y,
-                             split_interior_points_z);
-  const ivect locnp =
-      either(split_interior, split_interior_locnp, default_locnp);
-  const ivect rem = either(split_interior, split_interior_rem, default_rem);
-
+  const ivect locnp = glonp / nprocs_dir;
+  const ivect rem = glonp % nprocs_dir;
   const ivect step = locnp * cstr;
   assert(dim == 3);
-
-  const ivect halfrem = rem / 2;
-  const ivect halfnprocs_dir = nprocs_dir / 2;
 
   vector<int> boundsz(nprocs_dir[2] + 1);
   vector<ipfulltree *> subtreesz(nprocs_dir[2]);
@@ -1173,58 +1152,13 @@ static void SplitRegions_AsSpecified(cGH const *const cctkGH,
         ivect cub = rlb0 + step * (ipos + 1);
         // 	  clb = min (clb, rub);
         // 	  cub = min (cub, rub);
-
-        /* modify component lower and upper boundary accordingly */
-        const ivect ijk(i, j, k);
         for (int d = 0; d < dim; ++d) {
-          if (split_interior[d]) {
-            if (ijk[d] > 0)
-              clb[d] = clb[d] + ghost_width[0][d];
-            if (ijk[d] < nprocs_dir[d] - 1)
-              cub[d] = cub[d] + ghost_width[1][d];
-            else
-              cub[d] = cub[d] + ghost_width[0][d] + ghost_width[1][d];
-          }
-        }
-
-        const bvect symmetrically_distribute_points(
-            symmetrically_distribute_points_x,
-            symmetrically_distribute_points_y,
-            symmetrically_distribute_points_z);
-        for (int d = 0; d < dim; ++d) {
-          /* if symmetrically distributed in each dir */
-          if (symmetrically_distribute_points[d] && rem[d] != 0) {
-            if (rem[d] % 2 == 0) { // symmetric arround the center of
-                                   // computational domain in dir 'd' where
-                                   // symmetrically_distribute_points[d] = yes
-              if (ipos[d] < halfrem[d]) {
-                clb[d] += cstr[d] * ipos[d];
-                cub[d] += cstr[d] * (ipos[d] + 1);
-              } else if (ipos[d] < halfnprocs_dir[d]) {
-                clb[d] += cstr[d] * halfrem[d];
-                cub[d] += cstr[d] * halfrem[d];
-              } else if (ipos[d] < halfnprocs_dir[d] + halfrem[d]) {
-                clb[d] += cstr[d] * (ipos[d] - halfnprocs_dir[d] + halfrem[d]);
-                cub[d] +=
-                    cstr[d] * (ipos[d] - halfnprocs_dir[d] + halfrem[d] + 1);
-              } else {
-                clb[d] += cstr[d] * rem[d];
-                cub[d] += cstr[d] * rem[d];
-              }
-            } else {
-              CCTK_VERROR(
-                  "Could not symmetrically_distribute_points, since point num "
-                  "%d is not even in the dir being distributed",
-                  (int)rem[d]);
-            }
+          if (ipos[d] < rem[d]) {
+            clb[d] += cstr[d] * ipos[d];
+            cub[d] += cstr[d] * (ipos[d] + 1);
           } else {
-            if (ipos[d] < rem[d]) {
-              clb[d] += cstr[d] * ipos[d];
-              cub[d] += cstr[d] * (ipos[d] + 1);
-            } else {
-              clb[d] += cstr[d] * rem[d];
-              cub[d] += cstr[d] * rem[d];
-            }
+            clb[d] += cstr[d] * rem[d];
+            cub[d] += cstr[d] * rem[d];
           }
         }
         assert(all(clb >= 0));

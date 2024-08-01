@@ -492,6 +492,8 @@ CarpetRegrid2_Regrid(CCTK_POINTER_TO_CONST const cctkGH_,
     do_recompose = false;
     if (adaptive_refinement)
       do_recompose = true;
+    if (force_recompose_even_level_unchanged)
+      do_recompose = true;
     if (not do_recompose) {
       for (int n = 0; n < num_centres; ++n) {
 
@@ -717,6 +719,8 @@ CarpetRegrid2_RegridMaps(CCTK_POINTER_TO_CONST const cctkGH_,
     do_recompose = false;
     if (adaptive_refinement)
       do_recompose = true;
+    if (force_recompose_even_level_unchanged)
+      do_recompose = true;
     if (not do_recompose) {
       for (int n = 0; n < num_centres; ++n) {
 
@@ -895,9 +899,12 @@ CarpetRegrid2_RegridMaps(CCTK_POINTER_TO_CONST const cctkGH_,
             level_did_change or int(old_superregsss.at(m).size()) <= rl or
             superregsss.at(m).at(rl) != old_superregsss.at(m).at(rl);
       }
+      if (force_recompose_even_level_unchanged){
+        level_did_change = true;
+      }
       any_level_did_change = any_level_did_change or level_did_change;
 
-      if (level_did_change) {
+      if (level_did_change or force_recompose_even_level_unchanged) {
         // The level changed: perform domain decomposition
 
         vector<vector<region_t> > superregss(maps);
@@ -917,6 +924,10 @@ CarpetRegrid2_RegridMaps(CCTK_POINTER_TO_CONST const cctkGH_,
         // decomposition
 
         for (int m = 0; m < maps; ++m) {
+          if (verbose or veryverbose) {
+            CCTK_VINFO("Re-using domain decomposition for map %d level %d", m,
+                       rl);
+          }
           superregsss.at(m).at(rl).swap(old_superregsss.at(m).at(rl));
           int const ml = 0;
           regsss.at(m).at(rl).swap(old_regssss.at(m).at(ml).at(rl));

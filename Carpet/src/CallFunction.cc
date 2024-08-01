@@ -437,8 +437,7 @@ void CallScheduledFunction(char const *restrict const time_and_mode,
       Accelerator_PreCallFunction(cctkGH, attribute);
       pre_timer.stop();
     }
-    int const res =
-        CCTK_CallFunction(function, attribute, const_cast<cGH *>(cctkGH));
+    int const res = CCTK_CallFunction(function, attribute, (cGH *)data);
     assert(res == 0);
     if (CCTK_IsFunctionAliased("Accelerator_PostCallFunction")) {
       Timers::Timer post_timer("PostCall");

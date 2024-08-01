@@ -6,14 +6,6 @@ OPTIONAL MPI
 {
 }
 
-OPTIONAL rnpletal
-{
-}
-
-OPTIONAL SDF
-{
-}
-
 PROVIDES CarpetIOHDF5
 {
 }

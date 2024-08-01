@@ -8,6 +8,9 @@ BOOLEAN veryverbose "Display much regridding information on the terminal" STEERA
 {
 } "no"
 
+BOOLEAN force_recompose_even_level_unchanged "force re-decompose" STEERABLE=always
+{
+} "no"
 
 
 CCTK_INT min_distance "Minimum distance (in grid points) between coarse and fine grid boundaries" STEERABLE=always
